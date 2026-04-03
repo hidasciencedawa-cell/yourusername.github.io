@@ -1,0 +1,102 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Mount Print Zone | Login</title>
+<link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+<div class="navbar">
+  <div class="nav-left">
+    <div class="logo-box">
+      <img src="images/mpz.png" alt="Mount Print Zone logo">
+    </div>
+    <div>
+      <div class="brand">Mount Print Zone</div>
+      <span class="brand-subtitle">Printer Shop Management</span>
+    </div>
+  </div>
+</div>
+
+<div class="auth-wrapper">
+  <div class="auth-card">
+    <section class="auth-side">
+      <div class="kicker">Smart Print Desk</div>
+      <h1>Manage printing orders, customers, and daily revenue from one place.</h1>
+      <p>This starter runs fully in the browser so you can test the full printer shop workflow immediately.</p>
+      <div class="auth-points">
+        <div class="auth-point">
+          <strong>Customer flow</strong>
+          <p>Browse services, place orders, track statuses, and read notifications.</p>
+        </div>
+        <div class="auth-point">
+          <strong>Admin flow</strong>
+          <p>Accept, complete, or cancel orders while monitoring reports, services, and payments.</p>
+        </div>
+        <div class="auth-point">
+          <strong>Security basics</strong>
+          <p>Passwords are hashed in-browser, admin login checks a secret code, and pages are role-protected.</p>
+        </div>
+      </div>
+    </section>
+
+    <section class="auth-panel">
+      <div class="tabs">
+        <button type="button" class="tab active active-tab" id="loginTab">Login</button>
+        <button type="button" class="tab" id="registerTab">Register</button>
+      </div>
+
+      <h2 id="formTitle">Login to your account</h2>
+      <p class="section-subtitle" id="formHint">Use your email, password, and role to continue into the dashboard.</p>
+
+      <div class="field-stack">
+        <div id="nameWrap" class="hidden">
+          <label for="nameInput">Full Name</label>
+          <input id="nameInput" type="text" placeholder="Enter your full name">
+        </div>
+
+        <div id="phoneWrap" class="hidden">
+          <label for="phoneInput">Phone Number</label>
+          <input id="phoneInput" type="tel" placeholder="Enter your phone number">
+        </div>
+
+        <div>
+          <label for="emailInput">Email Address</label>
+          <input id="emailInput" type="email" placeholder="name@example.com">
+        </div>
+
+        <div>
+          <label for="passInput">Password</label>
+          <input id="passInput" type="password" placeholder="Enter your password">
+        </div>
+
+        <div id="confirmWrap" class="hidden">
+          <label for="confirmInput">Confirm Password</label>
+          <input id="confirmInput" type="password" placeholder="Repeat your password">
+        </div>
+
+        <div>
+          <label for="roleInput">Role</label>
+          <select id="roleInput">
+            <option value="customer">Customer</option>
+            <option value="admin">Admin</option>
+          </select>
+        </div>
+
+        <div id="secretWrap">
+          <label for="secretInput">Admin Secret Code</label>
+          <input id="secretInput" type="password" placeholder="Required for admin actions">
+        </div>
+      </div>
+
+      <button type="button" class="main-btn" id="submitBtn">Login</button>
+      <p class="muted" id="helperText" style="margin-top: 14px;">Admin login requires a valid secret code.</p>
+    </section>
+  </div>
+</div>
+
+<script src="js/app.js"></script>
+<script src="js/auth.js"></script>
+</body>
+</html>

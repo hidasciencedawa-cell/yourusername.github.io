@@ -1,0 +1,696 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Mount Print Zone | Admin Dashboard</title>
+<link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+<div class="navbar">
+  <div class="nav-left">
+    <div class="logo-box">
+      <img src="images/mpz.png" alt="Mount Print Zone logo">
+    </div>
+    <div>
+      <div class="brand">Admin Dashboard</div>
+      <span class="brand-subtitle" id="adminSubtitle">Printer shop management</span>
+    </div>
+  </div>
+  <div class="nav-right button-row">
+    <button type="button" class="ghost-btn" id="refreshBtn">Refresh</button>
+    <button type="button" class="primary-btn" id="logoutBtn">Logout</button>
+  </div>
+</div>
+
+<div class="page-shell">
+  <div class="main-layout">
+    <aside class="sidebar">
+      <button type="button" class="menu-item active-menu" data-page="dashboard">Overview</button>
+      <button type="button" class="menu-item" data-page="orders">Orders</button>
+      <button type="button" class="menu-item" data-page="customers">Customers</button>
+      <button type="button" class="menu-item" data-page="services">Services</button>
+      <button type="button" class="menu-item" data-page="reports">Daily Reports</button>
+      <button type="button" class="menu-item" data-page="notifications">Notifications</button>
+    </aside>
+
+    <main>
+      <section id="dashboard" class="page active">
+        <div class="hero-card">
+          <div class="hero-grid">
+            <div>
+              <div class="kicker">Operations Center</div>
+              <h1 id="adminHeading">Track every order and payment in one place.</h1>
+              <p>Monitor order movement, customer growth, payment split, and permanent daily records.</p>
+            </div>
+            <div class="panel">
+              <h3 class="panel-title">Admin Access Notes</h3>
+              <p class="muted">This demo stores data locally in the browser. It already enforces role checks, hashed passwords, and admin secret code validation.</p>
+              <div class="info-strip">
+                <div class="info-pill">Data retention: Permanent</div>
+                <div class="info-pill">Admin routes: Restricted</div>
+                <div class="info-pill">Passwords: SHA-256 hashed</div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="stats-grid" id="statsGrid"></div>
+      </section>
+
+      <section id="orders" class="page">
+        <div class="table-card">
+          <div class="button-row" style="justify-content: space-between; align-items: center; margin-bottom: 16px;">
+            <div>
+              <h2 class="section-title">All Orders</h2>
+              <p class="section-subtitle">Accept, complete, or cancel customer requests.</p>
+            </div>
+            <div class="filter-row" id="orderFilterRow">
+              <button type="button" class="filter-chip active" data-filter="ALL">All</button>
+              <button type="button" class="filter-chip" data-filter="PENDING">Pending</button>
+              <button type="button" class="filter-chip" data-filter="ACCEPTED">Accepted</button>
+              <button type="button" class="filter-chip" data-filter="COMPLETED">Completed</button>
+              <button type="button" class="filter-chip" data-filter="CANCELLED">Cancelled</button>
+            </div>
+          </div>
+          <div class="table-scroll">
+            <table>
+              <thead>
+                <tr>
+                  <th>Order ID</th>
+                  <th>Customer</th>
+                  <th>Service</th>
+                  <th>Order Details</th>
+                  <th>Amount</th>
+                  <th>Status</th>
+                  <th>Payment</th>
+                  <th>Date</th>
+                  <th>Actions</th>
+                </tr>
+              </thead>
+              <tbody id="ordersBody"></tbody>
+            </table>
+          </div>
+        </div>
+      </section>
+
+      <section id="customers" class="page">
+        <div class="table-card">
+          <h2 class="section-title">Customer Management</h2>
+          <p class="section-subtitle">All customer accounts and their order totals.</p>
+          <div class="table-scroll">
+            <table>
+              <thead>
+                <tr>
+                  <th>Name</th>
+                  <th>Phone</th>
+                  <th>Email</th>
+                  <th>Role</th>
+                  <th>Total Orders</th>
+                  <th>Completed Orders</th>
+                  <th>Actions</th>
+                </tr>
+              </thead>
+              <tbody id="customersBody"></tbody>
+            </table>
+          </div>
+        </div>
+      </section>
+
+      <section id="services" class="page">
+        <div class="grid-2">
+          <div class="table-card">
+            <h2 class="section-title">Service Management</h2>
+            <p class="section-subtitle">Add new services or update prices for the print shop.</p>
+            <div class="field-stack">
+              <div>
+                <label for="serviceNameInput">Service Name</label>
+                <input id="serviceNameInput" type="text" placeholder="Example: Thesis Printing">
+              </div>
+              <div>
+                <label for="serviceDescriptionInput">Description</label>
+                <textarea id="serviceDescriptionInput" placeholder="Explain what this service includes"></textarea>
+              </div>
+              <div class="form-grid">
+                <div>
+                  <label for="servicePriceInput">Price</label>
+                  <input id="servicePriceInput" type="number" min="0" step="0.01" placeholder="0.00">
+                </div>
+                <div>
+                  <label for="serviceUnitInput">Unit</label>
+                  <input id="serviceUnitInput" type="text" placeholder="per copy / per order">
+                </div>
+              </div>
+              <button type="button" class="primary-btn" id="saveServiceBtn">Add Service</button>
+            </div>
+          </div>
+
+          <div class="table-card">
+            <h2 class="section-title">Current Services</h2>
+            <p class="section-subtitle">Existing services can be edited or deleted.</p>
+            <div class="table-scroll">
+              <table>
+                <thead>
+                  <tr>
+                    <th>Name</th>
+                    <th>Description</th>
+                    <th>Price</th>
+                    <th>Unit</th>
+                    <th>Actions</th>
+                  </tr>
+                </thead>
+                <tbody id="servicesBody"></tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section id="reports" class="page">
+        <div class="grid-2">
+          <div class="table-card">
+            <h2 class="section-title">Date-wise Report</h2>
+            <p class="section-subtitle">Filter permanent data by date without deleting any records.</p>
+            <div class="field-stack">
+              <div>
+                <label for="reportDateInput">Selected Date</label>
+                <input id="reportDateInput" type="date">
+              </div>
+              <button type="button" class="primary-btn" id="loadReportBtn">Load Report</button>
+            </div>
+          </div>
+
+          <div class="table-card" id="reportSummary"></div>
+        </div>
+
+        <div class="table-card" style="margin-top: 20px;">
+          <h2 class="section-title">Orders On Selected Date</h2>
+          <div class="table-scroll">
+            <table>
+              <thead>
+                <tr>
+                  <th>Order ID</th>
+                  <th>Customer</th>
+                  <th>Service</th>
+                  <th>Status</th>
+                  <th>Payment</th>
+                  <th>Amount</th>
+                  <th>Date</th>
+                </tr>
+              </thead>
+              <tbody id="reportsBody"></tbody>
+            </table>
+          </div>
+        </div>
+      </section>
+
+      <section id="notifications" class="page">
+        <div class="table-card">
+          <div class="button-row" style="justify-content: space-between; align-items: center; margin-bottom: 12px;">
+            <div>
+              <h2 class="section-title">Admin Notifications</h2>
+              <p class="section-subtitle">New order alerts and order management events.</p>
+            </div>
+            <button type="button" class="secondary-btn" id="markAdminReadBtn">Mark as read</button>
+          </div>
+          <div class="notification-list" id="adminNotificationList"></div>
+        </div>
+      </section>
+    </main>
+  </div>
+</div>
+
+<div class="dialog-backdrop" id="completeDialog">
+  <div class="dialog">
+    <h3>Complete Order</h3>
+    <p class="muted">Choose how the customer paid before marking this order as completed.</p>
+    <div class="field-stack">
+      <div>
+        <label for="completePaymentType">Payment Type</label>
+        <select id="completePaymentType">
+          <option value="ONLINE">ONLINE</option>
+          <option value="OFFLINE">OFFLINE</option>
+        </select>
+      </div>
+      <div class="button-row">
+        <button type="button" class="primary-btn" id="confirmCompleteBtn">Complete Order</button>
+        <button type="button" class="secondary-btn" id="cancelCompleteBtn">Cancel</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script src="js/app.js"></script>
+<script>
+document.addEventListener('DOMContentLoaded', () => {
+  const {
+    addNotification,
+    clearSession,
+    computeStats,
+    currency,
+    formatDate,
+    getCustomers,
+    getDatabase,
+    localDate,
+    markNotificationsRead,
+    notificationBadge,
+    orderView,
+    paymentBadge,
+    requireAuth,
+    saveDatabase,
+    showBanner,
+    statusBadge,
+  } = window.PrinterShop;
+
+  const admin = requireAuth('admin');
+  if (!admin) {
+    return;
+  }
+
+  document.getElementById('adminSubtitle').textContent = `${admin.name} | ${admin.email}`;
+  document.getElementById('adminHeading').textContent = `Welcome ${admin.name}, shop operations are live.`;
+
+  let currentFilter = 'ALL';
+  let selectedOrderId = null;
+  let editingServiceId = null;
+
+  const statsGrid = document.getElementById('statsGrid');
+  const ordersBody = document.getElementById('ordersBody');
+  const customersBody = document.getElementById('customersBody');
+  const servicesBody = document.getElementById('servicesBody');
+  const reportsBody = document.getElementById('reportsBody');
+  const reportSummary = document.getElementById('reportSummary');
+  const adminNotificationList = document.getElementById('adminNotificationList');
+  const serviceNameInput = document.getElementById('serviceNameInput');
+  const serviceDescriptionInput = document.getElementById('serviceDescriptionInput');
+  const servicePriceInput = document.getElementById('servicePriceInput');
+  const serviceUnitInput = document.getElementById('serviceUnitInput');
+  const reportDateInput = document.getElementById('reportDateInput');
+  const completeDialog = document.getElementById('completeDialog');
+  const completePaymentType = document.getElementById('completePaymentType');
+
+  const pageButtons = document.querySelectorAll('[data-page]');
+  pageButtons.forEach((button) => {
+    button.addEventListener('click', () => {
+      pageButtons.forEach((item) => item.classList.remove('active-menu'));
+      button.classList.add('active-menu');
+      document.querySelectorAll('.page').forEach((page) => page.classList.remove('active'));
+      document.getElementById(button.dataset.page).classList.add('active');
+    });
+  });
+
+  function actionButtons(order) {
+    const disableAccept = order.status !== 'PENDING' ? 'disabled' : '';
+    const disableComplete = order.status !== 'ACCEPTED' ? 'disabled' : '';
+    const disableCancel = (order.status === 'COMPLETED' || order.status === 'CANCELLED') ? 'disabled' : '';
+
+    return `
+      <div class="button-row">
+        <button type="button" class="warning-btn" data-action="accept" data-id="${order.id}" ${disableAccept}>Accept</button>
+        <button type="button" class="success-btn" data-action="complete" data-id="${order.id}" ${disableComplete}>Complete</button>
+        <button type="button" class="danger-btn" data-action="cancel" data-id="${order.id}" ${disableCancel}>Cancel</button>
+        <button type="button" class="ghost-btn" data-action="delete" data-id="${order.id}">Remove</button>
+      </div>
+    `;
+  }
+
+  function renderStats(db) {
+    const stats = computeStats(db);
+    const items = [
+      ['Total Orders', stats.totalOrders, 'All customer orders stored permanently'],
+      ['Pending Orders', stats.pendingOrders, 'PENDING and ACCEPTED combined'],
+      ['Completed Orders', stats.completedOrders, 'Finished orders with payment captured'],
+      ['Cancelled Orders', stats.cancelledOrders, 'Orders cancelled by the admin'],
+      ['Online Payments', currency(stats.onlineTotal), 'Completed orders paid online'],
+      ['Offline Payments', currency(stats.offlineTotal), 'Completed orders paid offline'],
+      ['Total Revenue', currency(stats.totalRevenue), 'Online plus offline completed revenue'],
+      ['Total Customers', stats.totalCustomers, 'Registered customer accounts'],
+    ];
+
+    statsGrid.innerHTML = items.map(([label, value, foot]) => `
+      <div class="stat-card">
+        <div class="stat-label">${label}</div>
+        <div class="stat-value">${value}</div>
+        <div class="stat-foot">${foot}</div>
+      </div>
+    `).join('');
+  }
+
+  function getFilteredOrders(db) {
+    const orders = db.orders.map((order) => orderView(order, db)).sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
+    if (currentFilter === 'ALL') {
+      return orders;
+    }
+    return orders.filter((order) => order.status === currentFilter);
+  }
+
+  function renderOrders(db) {
+    const rows = getFilteredOrders(db).map((order) => `
+      <tr>
+        <td>${order.id}</td>
+        <td>
+          <strong>${order.customerName}</strong><br>
+          <span class="muted">${order.customerPhone}</span>
+        </td>
+        <td>${order.serviceName}</td>
+        <td>
+          Qty: ${order.quantity}<br>
+          ${order.options.printMode.replaceAll('_', ' ')} / ${order.options.paperSize}<br>
+          ${order.fileName ? `File: ${order.fileName}` : 'No file'}
+        </td>
+        <td>${currency(order.amount)}</td>
+        <td>${statusBadge(order.status)}</td>
+        <td>${paymentBadge(order.paymentType)}</td>
+        <td>${formatDate(order.createdAt)}</td>
+        <td>${actionButtons(order)}</td>
+      </tr>
+    `).join('');
+
+    ordersBody.innerHTML = rows || '<tr><td colspan="9"><div class="empty-state">No orders match this filter.</div></td></tr>';
+  }
+
+  function renderCustomers(db) {
+    const customers = getCustomers(db).map((customer) => {
+      const customerOrders = db.orders.filter((order) => order.userId === customer.id);
+      return {
+        ...customer,
+        totalOrders: customerOrders.length,
+        completedOrders: customerOrders.filter((order) => order.status === 'COMPLETED').length,
+      };
+    });
+
+    customersBody.innerHTML = customers.map((customer) => `
+      <tr>
+        <td>${customer.name}</td>
+        <td>${customer.phone}</td>
+        <td>${customer.email}</td>
+        <td>${window.PrinterShop.roleBadge(customer.role)}</td>
+        <td>${customer.totalOrders}</td>
+        <td>${customer.completedOrders}</td>
+        <td><button type="button" class="danger-btn" data-customer-action="delete" data-id="${customer.id}">Remove</button></td>
+      </tr>
+    `).join('') || '<tr><td colspan="7"><div class="empty-state">No customers registered yet.</div></td></tr>';
+  }
+
+  function renderServices(db) {
+    servicesBody.innerHTML = db.services.map((service) => `
+      <tr>
+        <td>${service.name}</td>
+        <td>${service.description}</td>
+        <td>${currency(service.price)}</td>
+        <td>${service.unit || '-'}</td>
+        <td>
+          <div class="button-row">
+            <button type="button" class="secondary-btn" data-service-action="edit" data-id="${service.id}">Edit</button>
+            <button type="button" class="danger-btn" data-service-action="delete" data-id="${service.id}">Delete</button>
+          </div>
+        </td>
+      </tr>
+    `).join('') || '<tr><td colspan="5"><div class="empty-state">No services available.</div></td></tr>';
+  }
+
+  function renderNotifications() {
+    const notes = window.PrinterShop.getNotificationsForUser(admin.id, true);
+    adminNotificationList.innerHTML = notes.length
+      ? notes.map((note) => `
+          <div class="notification-item">
+            <div class="button-row" style="justify-content: space-between; align-items: center; margin-bottom: 8px;">
+              <strong>${note.message}</strong>
+              ${notificationBadge(note.status)}
+            </div>
+            <div class="muted">${formatDate(note.timestamp)}</div>
+          </div>
+        `).join('')
+      : '<div class="empty-state">No notifications yet.</div>';
+  }
+
+  function renderReport(dateValue) {
+    const db = getDatabase();
+    const stats = computeStats(db, dateValue);
+    const matchingOrders = db.orders
+      .filter((order) => localDate(order.createdAt) === dateValue)
+      .map((order) => orderView(order, db))
+      .sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
+
+    reportSummary.innerHTML = `
+      <h2 class="section-title">Report Summary</h2>
+      <p class="section-subtitle">${dateValue ? `Report for ${dateValue}` : 'Choose a date to see the report.'}</p>
+      <div class="info-strip">
+        <div class="info-pill">Total Orders: <strong>${stats.totalOrders}</strong></div>
+        <div class="info-pill">Completed: <strong>${stats.completedOrders}</strong></div>
+        <div class="info-pill">Pending: <strong>${stats.pendingOrders}</strong></div>
+        <div class="info-pill">Cancelled: <strong>${stats.cancelledOrders}</strong></div>
+        <div class="info-pill">Online Total: <strong>${currency(stats.onlineTotal)}</strong></div>
+        <div class="info-pill">Offline Total: <strong>${currency(stats.offlineTotal)}</strong></div>
+        <div class="info-pill">Revenue: <strong>${currency(stats.totalRevenue)}</strong></div>
+      </div>
+    `;
+
+    reportsBody.innerHTML = matchingOrders.map((order) => `
+      <tr>
+        <td>${order.id}</td>
+        <td>${order.customerName}</td>
+        <td>${order.serviceName}</td>
+        <td>${statusBadge(order.status)}</td>
+        <td>${paymentBadge(order.paymentType)}</td>
+        <td>${currency(order.amount)}</td>
+        <td>${formatDate(order.createdAt)}</td>
+      </tr>
+    `).join('') || '<tr><td colspan="7"><div class="empty-state">No orders found for the selected date.</div></td></tr>';
+  }
+
+  function refresh() {
+    const db = getDatabase();
+    renderStats(db);
+    renderOrders(db);
+    renderCustomers(db);
+    renderServices(db);
+    renderNotifications();
+    renderReport(reportDateInput.value || localDate());
+  }
+
+  function updateOrder(orderId, updater) {
+    const db = getDatabase();
+    const order = db.orders.find((item) => item.id === orderId);
+    if (!order) {
+      showBanner('Order not found.', 'error');
+      return;
+    }
+
+    updater(order, db);
+    saveDatabase(db);
+    refresh();
+  }
+
+  document.getElementById('orderFilterRow').addEventListener('click', (event) => {
+    const button = event.target.closest('[data-filter]');
+    if (!button) {
+      return;
+    }
+
+    currentFilter = button.dataset.filter;
+    document.querySelectorAll('[data-filter]').forEach((chip) => chip.classList.remove('active'));
+    button.classList.add('active');
+    renderOrders(getDatabase());
+  });
+
+  ordersBody.addEventListener('click', (event) => {
+    const action = event.target.dataset.action;
+    const orderId = event.target.dataset.id;
+    if (!action || !orderId) {
+      return;
+    }
+
+    if (action === 'accept') {
+      updateOrder(orderId, (order, db) => {
+        order.status = 'ACCEPTED';
+        addNotification(db, order.userId, `Your order ${order.id} has been accepted.`);
+      });
+      showBanner('Order accepted.', 'success');
+      return;
+    }
+
+    if (action === 'cancel') {
+      updateOrder(orderId, (order, db) => {
+        order.status = 'CANCELLED';
+        addNotification(db, order.userId, `Your order ${order.id} has been cancelled.`);
+      });
+      showBanner('Order cancelled.', 'info');
+      return;
+    }
+
+    if (action === 'complete') {
+      selectedOrderId = orderId;
+      completePaymentType.value = 'ONLINE';
+      completeDialog.classList.add('show');
+      return;
+    }
+
+    if (action === 'delete') {
+      if (!window.confirm('Delete this order permanently? This cannot be undone.')) {
+        return;
+      }
+      const db = getDatabase();
+      db.orders = db.orders.filter((item) => item.id !== orderId);
+      db.notifications = db.notifications.filter((note) => !note.message.includes(orderId));
+      saveDatabase(db);
+      refresh();
+      showBanner('Order removed permanently.', 'info');
+    }
+  });
+
+  customersBody.addEventListener('click', (event) => {
+    const action = event.target.dataset.customerAction;
+    const customerId = event.target.dataset.id;
+    if (action !== 'delete' || !customerId) {
+      return;
+    }
+
+    if (!window.confirm('Delete this customer permanently? Their orders and notifications will also be removed.')) {
+      return;
+    }
+
+    const db = getDatabase();
+    const customer = db.users.find((item) => item.id === customerId);
+    const customerOrderIds = db.orders.filter((order) => order.userId === customerId).map((order) => order.id);
+
+    db.users = db.users.filter((item) => item.id !== customerId);
+    db.orders = db.orders.filter((order) => order.userId !== customerId);
+    db.notifications = db.notifications.filter((note) => {
+      if (note.recipientId === customerId) {
+        return false;
+      }
+      return !customerOrderIds.some((orderId) => note.message.includes(orderId));
+    });
+
+    saveDatabase(db);
+    refresh();
+    showBanner(`${customer ? customer.name : 'Customer'} removed permanently.`, 'info');
+  });
+
+  document.getElementById('confirmCompleteBtn').addEventListener('click', () => {
+    if (!selectedOrderId) {
+      return;
+    }
+
+    updateOrder(selectedOrderId, (order, db) => {
+      order.status = 'COMPLETED';
+      order.paymentType = completePaymentType.value;
+      addNotification(db, order.userId, `Your order ${order.id} has been completed with ${completePaymentType.value} payment.`);
+    });
+    completeDialog.classList.remove('show');
+    selectedOrderId = null;
+    showBanner('Order completed.', 'success');
+  });
+
+  document.getElementById('cancelCompleteBtn').addEventListener('click', () => {
+    completeDialog.classList.remove('show');
+    selectedOrderId = null;
+  });
+
+  document.getElementById('saveServiceBtn').addEventListener('click', () => {
+    const db = getDatabase();
+    const name = serviceNameInput.value.trim();
+    const description = serviceDescriptionInput.value.trim();
+    const price = Number(servicePriceInput.value || 0);
+    const unit = serviceUnitInput.value.trim();
+
+    if (!name || !description || price <= 0) {
+      showBanner('Service name, description, and valid price are required.', 'error');
+      return;
+    }
+
+    if (editingServiceId) {
+      const service = db.services.find((item) => item.id === editingServiceId);
+      if (!service) {
+        showBanner('Service not found.', 'error');
+        return;
+      }
+      service.name = name;
+      service.description = description;
+      service.price = price;
+      service.unit = unit || 'per order';
+      showBanner('Service updated.', 'success');
+    } else {
+      db.services.unshift({
+        id: window.PrinterShop.id('svc'),
+        name,
+        description,
+        price,
+        unit: unit || 'per order',
+        createdAt: window.PrinterShop.nowIso(),
+      });
+      showBanner('Service added.', 'success');
+    }
+
+    saveDatabase(db);
+    editingServiceId = null;
+    document.getElementById('saveServiceBtn').textContent = 'Add Service';
+    serviceNameInput.value = '';
+    serviceDescriptionInput.value = '';
+    servicePriceInput.value = '';
+    serviceUnitInput.value = '';
+    refresh();
+  });
+
+  servicesBody.addEventListener('click', (event) => {
+    const action = event.target.dataset.serviceAction;
+    const serviceId = event.target.dataset.id;
+    if (!action || !serviceId) {
+      return;
+    }
+
+    const db = getDatabase();
+    const service = db.services.find((item) => item.id === serviceId);
+    if (!service) {
+      showBanner('Service not found.', 'error');
+      return;
+    }
+
+    if (action === 'edit') {
+      editingServiceId = serviceId;
+      serviceNameInput.value = service.name;
+      serviceDescriptionInput.value = service.description;
+      servicePriceInput.value = service.price;
+      serviceUnitInput.value = service.unit || '';
+      document.getElementById('saveServiceBtn').textContent = 'Update Service';
+      document.querySelector('[data-page="services"]').click();
+      return;
+    }
+
+    if (action === 'delete') {
+      db.services = db.services.filter((item) => item.id !== serviceId);
+      saveDatabase(db);
+      showBanner('Service deleted.', 'info');
+      refresh();
+    }
+  });
+
+  document.getElementById('loadReportBtn').addEventListener('click', () => {
+    const dateValue = reportDateInput.value;
+    if (!dateValue) {
+      showBanner('Please select a date first.', 'error');
+      return;
+    }
+    renderReport(dateValue);
+  });
+
+  document.getElementById('markAdminReadBtn').addEventListener('click', () => {
+    markNotificationsRead(admin.id, true);
+    refresh();
+    showBanner('Notifications marked as read.', 'info');
+  });
+
+  document.getElementById('logoutBtn').addEventListener('click', () => {
+    clearSession();
+    window.location.href = 'auth.html';
+  });
+
+  document.getElementById('refreshBtn').addEventListener('click', refresh);
+
+  reportDateInput.value = localDate();
+  refresh();
+});
+</script>
+</body>
+</html>

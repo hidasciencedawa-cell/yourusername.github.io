@@ -1,0 +1,324 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Mount Print Zone | Customer Dashboard</title>
+<link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+<div class="navbar">
+  <div class="nav-left">
+    <div class="logo-box">
+      <img src="images/mpz.png" alt="Mount Print Zone logo">
+    </div>
+    <div>
+      <div class="brand">Customer Dashboard</div>
+      <span class="brand-subtitle" id="customerSubtitle">Manage your print requests</span>
+    </div>
+  </div>
+  <div class="nav-right button-row">
+    <button type="button" class="ghost-btn" id="refreshBtn">Refresh</button>
+    <button type="button" class="primary-btn" id="logoutBtn">Logout</button>
+  </div>
+</div>
+
+<div class="page-shell">
+  <section class="hero-card">
+    <div class="hero-grid">
+      <div>
+        <div class="kicker">Welcome back</div>
+        <h1 id="welcomeHeading">Print smarter with Mount Print Zone</h1>
+        <p id="welcomeText">Browse the current services, place your next order, and keep track of every status update in one dashboard.</p>
+        <div class="info-strip" id="customerQuickStats"></div>
+      </div>
+      <div class="panel" style="background: rgba(255,255,255,0.78);">
+        <h3 class="panel-title">Place a new order</h3>
+        <p class="section-subtitle">Choose a service, upload a file name, and send your request to the admin.</p>
+        <div class="field-stack">
+          <div>
+            <label for="serviceSelect">Service</label>
+            <select id="serviceSelect"></select>
+          </div>
+          <div class="form-grid">
+            <div>
+              <label for="quantityInput">Quantity</label>
+              <input id="quantityInput" type="number" min="1" value="1">
+            </div>
+            <div>
+              <label for="paperSizeInput">Paper Size</label>
+              <select id="paperSizeInput">
+                <option value="A4">A4</option>
+                <option value="A3">A3</option>
+                <option value="Photo 4x6">Photo 4x6</option>
+                <option value="Custom">Custom</option>
+              </select>
+            </div>
+          </div>
+          <div class="form-grid">
+            <div>
+              <label for="printModeInput">Print Mode</label>
+              <select id="printModeInput">
+                <option value="BLACK_AND_WHITE">Black and White</option>
+                <option value="COLOR">Color</option>
+              </select>
+            </div>
+            <div>
+              <label for="fileInput">Upload File</label>
+              <input id="fileInput" type="file">
+            </div>
+          </div>
+          <div>
+            <label for="notesInput">Order Notes</label>
+            <textarea id="notesInput" placeholder="Any extra instructions for the shop"></textarea>
+          </div>
+          <div class="info-pill" id="estimatedAmount">Estimated total: Rs 0.00</div>
+          <button type="button" class="primary-btn" id="placeOrderBtn">Place Order</button>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="grid-2">
+    <div class="table-card">
+      <h2 class="section-title">Available Services</h2>
+      <p class="section-subtitle">Current service list with descriptions and pricing.</p>
+      <div class="service-list" id="servicesList"></div>
+    </div>
+
+    <div class="table-card">
+      <div class="button-row" style="justify-content: space-between; align-items: center; margin-bottom: 12px;">
+        <div>
+          <h2 class="section-title">Notifications</h2>
+          <p class="section-subtitle">Recent updates from the print shop.</p>
+        </div>
+        <button type="button" class="secondary-btn" id="markReadBtn">Mark as read</button>
+      </div>
+      <div class="notification-list" id="notificationList"></div>
+    </div>
+  </section>
+
+  <section class="table-card" style="margin-top: 20px;">
+    <h2 class="section-title">Order History</h2>
+    <p class="section-subtitle">All your past and current orders are stored permanently here.</p>
+    <div class="table-scroll">
+      <table>
+        <thead>
+          <tr>
+            <th>Order ID</th>
+            <th>Service</th>
+            <th>Quantity</th>
+            <th>Options</th>
+            <th>Amount</th>
+            <th>Status</th>
+            <th>Payment</th>
+            <th>Date</th>
+          </tr>
+        </thead>
+        <tbody id="orderHistoryBody"></tbody>
+      </table>
+    </div>
+  </section>
+</div>
+
+<script src="js/app.js"></script>
+<script>
+document.addEventListener('DOMContentLoaded', () => {
+  const {
+    clearSession,
+    currency,
+    formatDate,
+    getDatabase,
+    getNotificationsForUser,
+    getService,
+    markNotificationsRead,
+    orderAmount,
+    paymentBadge,
+    requireAuth,
+    saveDatabase,
+    showBanner,
+    statusBadge,
+    toFileName,
+    upsertNotification,
+  } = window.PrinterShop;
+
+  const user = requireAuth('customer');
+  if (!user) {
+    return;
+  }
+
+  const serviceSelect = document.getElementById('serviceSelect');
+  const quantityInput = document.getElementById('quantityInput');
+  const paperSizeInput = document.getElementById('paperSizeInput');
+  const printModeInput = document.getElementById('printModeInput');
+  const fileInput = document.getElementById('fileInput');
+  const notesInput = document.getElementById('notesInput');
+  const estimatedAmount = document.getElementById('estimatedAmount');
+  const servicesList = document.getElementById('servicesList');
+  const orderHistoryBody = document.getElementById('orderHistoryBody');
+  const notificationList = document.getElementById('notificationList');
+  const welcomeHeading = document.getElementById('welcomeHeading');
+  const welcomeText = document.getElementById('welcomeText');
+  const customerQuickStats = document.getElementById('customerQuickStats');
+
+  document.getElementById('customerSubtitle').textContent = `${user.name} | ${user.email}`;
+  welcomeHeading.textContent = `Hello ${user.name}, your print desk is ready.`;
+  welcomeText.textContent = 'Place a new order, follow status changes, and keep a permanent record of every request.';
+
+  function myOrders(db) {
+    return db.orders.filter((order) => order.userId === user.id).sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
+  }
+
+  function renderStats(db) {
+    const orders = myOrders(db);
+    const completed = orders.filter((order) => order.status === 'COMPLETED').length;
+    const pending = orders.filter((order) => order.status === 'PENDING' || order.status === 'ACCEPTED').length;
+    const spent = orders.filter((order) => order.status === 'COMPLETED').reduce((sum, order) => sum + Number(order.amount || 0), 0);
+
+    customerQuickStats.innerHTML = `
+      <div class="info-pill">Total Orders: <strong>${orders.length}</strong></div>
+      <div class="info-pill">Open Orders: <strong>${pending}</strong></div>
+      <div class="info-pill">Completed: <strong>${completed}</strong></div>
+      <div class="info-pill">Total Spent: <strong>${currency(spent)}</strong></div>
+    `;
+  }
+
+  function renderServiceOptions(db) {
+    serviceSelect.innerHTML = db.services.map((service) => `
+      <option value="${service.id}">${service.name} - ${currency(service.price)} ${service.unit ? `(${service.unit})` : ''}</option>
+    `).join('');
+
+    servicesList.innerHTML = db.services.length
+      ? db.services.map((service) => `
+          <div class="service-item">
+            <div class="button-row" style="justify-content: space-between; align-items: flex-start;">
+              <div>
+                <h3 style="margin-bottom: 6px;">${service.name}</h3>
+                <p class="muted">${service.description}</p>
+              </div>
+              <div class="service-price">${currency(service.price)}</div>
+            </div>
+            <div class="info-pill">Unit: ${service.unit || 'per order'}</div>
+          </div>
+        `).join('')
+      : '<div class="empty-state">No services available yet. Ask the admin to add one.</div>';
+
+    updateEstimate();
+  }
+
+  function updateEstimate() {
+    const db = getDatabase();
+    const service = getService(db, serviceSelect.value);
+    const quantity = Math.max(1, Number(quantityInput.value || 1));
+    if (!service) {
+      estimatedAmount.textContent = 'Estimated total: Rs 0.00';
+      return;
+    }
+    estimatedAmount.textContent = `Estimated total: ${currency(orderAmount(service, quantity))}`;
+  }
+
+  function renderOrderHistory(db) {
+    const rows = myOrders(db).map((order) => {
+      const service = getService(db, order.serviceId);
+      return `
+        <tr>
+          <td>${order.id}</td>
+          <td>${service ? service.name : 'Removed service'}</td>
+          <td>${order.quantity}</td>
+          <td>
+            ${order.options.printMode.replaceAll('_', ' ')}<br>
+            ${order.options.paperSize}<br>
+            ${order.fileName ? `File: ${order.fileName}` : 'No file uploaded'}
+          </td>
+          <td>${currency(order.amount)}</td>
+          <td>${statusBadge(order.status)}</td>
+          <td>${paymentBadge(order.paymentType)}</td>
+          <td>${formatDate(order.createdAt)}</td>
+        </tr>
+      `;
+    }).join('');
+
+    orderHistoryBody.innerHTML = rows || '<tr><td colspan="8"><div class="empty-state">No orders yet. Your first order will appear here.</div></td></tr>';
+  }
+
+  function renderNotifications() {
+    const notifications = getNotificationsForUser(user.id);
+    notificationList.innerHTML = notifications.length
+      ? notifications.slice(0, 8).map((note) => `
+          <div class="notification-item">
+            <div class="button-row" style="justify-content: space-between; align-items: center; margin-bottom: 8px;">
+              <strong>${note.message}</strong>
+              ${window.PrinterShop.notificationBadge(note.status)}
+            </div>
+            <div class="muted">${formatDate(note.timestamp)}</div>
+          </div>
+        `).join('')
+      : '<div class="empty-state">No notifications yet.</div>';
+  }
+
+  function refresh() {
+    const db = getDatabase();
+    renderStats(db);
+    renderServiceOptions(db);
+    renderOrderHistory(db);
+    renderNotifications();
+  }
+
+  document.getElementById('placeOrderBtn').addEventListener('click', () => {
+    const db = getDatabase();
+    const service = getService(db, serviceSelect.value);
+    const quantity = Math.max(1, Number(quantityInput.value || 1));
+
+    if (!service) {
+      showBanner('Please choose a service first.', 'error');
+      return;
+    }
+
+    const order = {
+      id: window.PrinterShop.id('ord'),
+      userId: user.id,
+      serviceId: service.id,
+      fileName: toFileName(fileInput),
+      quantity,
+      options: {
+        printMode: printModeInput.value,
+        paperSize: paperSizeInput.value,
+        notes: notesInput.value.trim(),
+      },
+      amount: orderAmount(service, quantity),
+      status: 'PENDING',
+      paymentType: 'NOT_SELECTED',
+      createdAt: window.PrinterShop.nowIso(),
+    };
+
+    db.orders.unshift(order);
+    saveDatabase(db);
+    upsertNotification('admin', `New order received from ${user.name} for ${service.name}.`);
+    showBanner('Order placed successfully.', 'success');
+
+    quantityInput.value = '1';
+    printModeInput.value = 'BLACK_AND_WHITE';
+    paperSizeInput.value = 'A4';
+    notesInput.value = '';
+    fileInput.value = '';
+    refresh();
+  });
+
+  quantityInput.addEventListener('input', updateEstimate);
+  serviceSelect.addEventListener('change', updateEstimate);
+  document.getElementById('logoutBtn').addEventListener('click', () => {
+    clearSession();
+    window.location.href = 'auth.html';
+  });
+  document.getElementById('refreshBtn').addEventListener('click', refresh);
+  document.getElementById('markReadBtn').addEventListener('click', () => {
+    markNotificationsRead(user.id);
+    refresh();
+    showBanner('Notifications marked as read.', 'info');
+  });
+
+  refresh();
+});
+</script>
+</body>
+</html>
